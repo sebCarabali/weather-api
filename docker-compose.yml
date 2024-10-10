@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  spring-app:
+    build:
+      context: .            # The path where the Dockerfile is located (project root)
+      dockerfile: Dockerfile # Dockerfile to use (optional if named 'Dockerfile')
+    container_name: spring-app
+    ports:
+      - "8080:8080"          # Expose port 8080 for the Spring Boot app
+    environment:
+      - REDIS_HOST=${REDIS_HOST}  # Set Redis host from .env file
+      - REDIS_PORT=${REDIS_PORT}  # Set Redis port from .env file
+      - SPRING_REDIS_PASSWORD=${SPRING_REDIS_PASSWORD}  # Redis password from .env file
+    depends_on:
+      - redis                # Ensure Redis starts before Spring Boot app
+
+  redis:
+    image: redis:7.0-alpine  # Use the official Redis image
+    container_name: redis
+    ports:
+      - "6379:6379"          # Expose port 6379 for Redis
+    volumes:
+      - redis-data:/data     # Persist Redis data in a Docker volume
+    command: redis-server --requirepass ${SPRING_REDIS_PASSWORD}  # Set password for Redis
+
+volumes:
+  redis-data:                 # Define the volume for persisting Redis data
